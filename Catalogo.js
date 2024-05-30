@@ -2,40 +2,65 @@ class Catalogo {
     #peliculas = [];
     #inputTituloPelicula = document.querySelector('#movieTitle');
     #inputImagenPelicula = document.querySelector('#movieImage');
+    #inputDescripcionPelicula = document.querySelector('#movieDescription');
+    #inputAnoPelicula = document.querySelector('#movieYear');
     #botonAgregarPelicula = document.querySelector('#addMovieBtn');
     #listaPeliculas = document.querySelector('#movieList');
 
     constructor() {
         // Configurar el evento para el botón de agregar película
         this.#botonAgregarPelicula.addEventListener('click', () => {
-            this.#agregarPelicula(this.#inputTituloPelicula.value.trim(), this.#inputImagenPelicula.value.trim());
-            this.#inputTituloPelicula.value = '';
-            this.#inputImagenPelicula.value = '';
+            this.#agregarPelicula(
+                this.#inputTituloPelicula.value.trim(),
+                this.#inputImagenPelicula.value.trim(),
+                this.#inputDescripcionPelicula.value.trim(),
+                this.#inputAnoPelicula.value.trim()
+            );
         });
     }
 
     // Método para agregar una película al catálogo
-    #agregarPelicula(titulo, imagen) {
-        if (!titulo || !imagen) {
-            if (!titulo) {
-                this.#inputTituloPelicula.classList.add('is-invalid');
-            }
-            if (!imagen) {
-                this.#inputImagenPelicula.classList.add('is-invalid');
-            }
-            return; // No agregar la película si faltan campos
+    #agregarPelicula(titulo, imagen, descripcion, ano) {
+        let camposValidos = true;
+        
+        if (!titulo) {
+            this.#inputTituloPelicula.classList.add('is-invalid');
+            camposValidos = false;
+        } else {
+            this.#inputTituloPelicula.classList.remove('is-invalid');
         }
 
-        // Limpiar clases de error si los campos están llenos
-        this.#inputTituloPelicula.classList.remove('is-invalid');
-        this.#inputImagenPelicula.classList.remove('is-invalid');
+        if (!imagen) {
+            this.#inputImagenPelicula.classList.add('is-invalid');
+            camposValidos = false;
+        } else {
+            this.#inputImagenPelicula.classList.remove('is-invalid');
+        }
 
-        this.#peliculas.push({ titulo, imagen });
+        if (!descripcion) {
+            this.#inputDescripcionPelicula.classList.add('is-invalid');
+            camposValidos = false;
+        } else {
+            this.#inputDescripcionPelicula.classList.remove('is-invalid');
+        }
+
+        if (!ano) {
+            this.#inputAnoPelicula.classList.add('is-invalid');
+            camposValidos = false;
+        } else {
+            this.#inputAnoPelicula.classList.remove('is-invalid');
+        }
+
+        if (!camposValidos) return;
+
+        this.#peliculas.push({ titulo, imagen, descripcion, ano });
         this.#actualizarLista();
-        // Limpiar campos después de agregar la película
         this.#inputTituloPelicula.value = '';
         this.#inputImagenPelicula.value = '';
+        this.#inputDescripcionPelicula.value = '';
+        this.#inputAnoPelicula.value = '';
     }
+
     // Método para eliminar una película del catálogo
     #eliminarPelicula(index) {
         this.#peliculas.splice(index, 1);
@@ -44,10 +69,13 @@ class Catalogo {
 
     // Método para editar una película en el catálogo
     #editarPelicula(index) {
-        const nuevoTitulo = prompt("Editar título de la película:", this.#peliculas[index].titulo);
+        const nuevaTitulo = prompt("Editar título de la película:", this.#peliculas[index].titulo);
         const nuevaImagen = prompt("Editar URL de la imagen de la película:", this.#peliculas[index].imagen);
-        if (nuevoTitulo !== null && nuevoTitulo.trim() !== "" && nuevaImagen !== null && nuevaImagen.trim() !== "") {
-            this.#peliculas[index] = { titulo: nuevoTitulo.trim(), imagen: nuevaImagen.trim() };
+        const nuevaDescripcion = prompt("Editar descripción de la película:", this.#peliculas[index].descripcion);
+        const nuevoAno = prompt("Editar año de la película:", this.#peliculas[index].ano);
+        
+        if (nuevaTitulo !== null && nuevaTitulo.trim() !== "" && nuevaImagen !== null && nuevaImagen.trim() !== "" && nuevaDescripcion !== null && nuevaDescripcion.trim() !== "" && nuevoAno !== null && nuevoAno.trim() !== "") {
+            this.#peliculas[index] = { titulo: nuevaTitulo.trim(), imagen: nuevaImagen.trim(), descripcion: nuevaDescripcion.trim(), ano: nuevoAno.trim() };
             this.#actualizarLista();
         }
     }
@@ -65,7 +93,7 @@ class Catalogo {
     #crearElementoLista(pelicula, index) {
         const elementoLista = document.createElement('li');
         elementoLista.className = 'list-group-item d-flex justify-content-between align-items-center';
-        
+
         const contenedorDetalles = document.createElement('div');
         contenedorDetalles.className = 'd-flex align-items-center';
 
@@ -73,10 +101,9 @@ class Catalogo {
         imagen.src = pelicula.imagen;
         imagen.alt = pelicula.titulo;
         imagen.className = 'img-thumbnail me-3';
-        imagen.style.width = '100px';
 
         const titulo = document.createElement('span');
-        titulo.textContent = pelicula.titulo;
+        titulo.innerHTML = `<strong>${pelicula.titulo}</strong><br><small>${pelicula.descripcion}</small><br><em>${pelicula.ano}</em>`;
 
         contenedorDetalles.appendChild(imagen);
         contenedorDetalles.appendChild(titulo);
@@ -108,7 +135,7 @@ class Catalogo {
     // Método para crear un botón de editar para cada película
     #crearBotonEditar(index) {
         const botonEditar = document.createElement('button');
-        botonEditar.className = 'btn btn-warning btn-sm me-2';
+        botonEditar.className = 'btn btn-secondary btn-sm';
         botonEditar.textContent = 'Editar';
         botonEditar.onclick = () => this.#editarPelicula(index);
 
@@ -116,7 +143,7 @@ class Catalogo {
     }
 }
 
-// Crear una instancia del catálogo cuando el contenido de la página esté cargado
+// Crear una instancia de la clase Catalogo cuando se carga la página
 document.addEventListener('DOMContentLoaded', () => {
     new Catalogo();
 });
